@@ -16,7 +16,7 @@ const Header = ({ siteTitle }) => (
         <div className={"navbar-start"}>
 
           <Link className={"navbar-item"} to="/">Home</Link>
-          <Link className={"navbar-item"} to="/blog">Blog</Link>
+          <Link className={"navbar-item"} to="/article">Blog</Link>
           <Link className={"navbar-item"} to="/research">Research</Link>
           <Link className={"navbar-item"} to="/members">Members</Link>
           <Link className={"navbar-item"} to="/publications">Publications</Link>

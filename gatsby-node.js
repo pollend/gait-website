@@ -9,6 +9,8 @@
 
 
 const path = require(`path`);
+const createPaginatedPages = require("gatsby-paginate");
+
 
 const makeRequest = (graphql, request) =>
   new Promise((resolve, reject) => {
@@ -29,29 +31,75 @@ const makeRequest = (graphql, request) =>
 exports.createPages = ({ boundActionCreators, graphql }) => {
   const { createPage } = boundActionCreators;
 
-  const getArticles = makeRequest(
-    graphql,
-    `
-    {
-      allStrapiArticle {
-        edges {
-          node {
-            id
+  // const getArticle = makeRequest(
+  //   graphql,
+  //   `
+  //   {
+  //     allStrapiArticle {
+  //       edges {
+  //         node {
+  //           id
+  //         }
+  //       }
+  //     }
+  //   }
+  //   `
+  // ).then(result => {
+  //   // Create pages for each article.
+  //   result.data.allStrapiArticle.edges.forEach(({ node }) => {
+  //     createPage({
+  //       path: `/${node.id}`,
+  //       component: path.resolve(`src/templates/article.js`),
+  //       context: {
+  //         id: node.id,
+  //       },
+  //     });
+  //   });
+  // });
+
+
+  const articles = new Promise((resolve,reject) => {
+    graphql(`{
+    allStrapiArticle(sort: { fields: [createdAt], order: DESC }) {
+      edges {
+        node {
+          id,
+          content,
+          published_on,
+          title,
+          author {
+            id,
+            username
+          },
+          tags {
+            id,
+            name
           }
         }
       }
     }
-    `
-  ).then(result => {
-    // Create pages for each article.
-    result.data.allStrapiArticle.edges.forEach(({ node }) => {
-      createPage({
-        path: `/${node.id}`,
-        component: path.resolve(`src/templates/article.js`),
-        context: {
-          id: node.id,
-        },
+  }`).then(result => {
+      if (result.errors) {
+        reject(result.errors);
+      }
+      createPaginatedPages({
+        edges: result.data.allStrapiArticle.edges,
+        createPage: createPage,
+        pageTemplate: path.resolve("src/templates/articles.js"),
+        pageLength: 5,
+        pathPrefix: "article",
+        context: {}
       });
+      result.data.allStrapiArticle.edges.map(({ node }) => {
+        createPage({
+          path: `/${node.id}`,
+          component: path.resolve(`src/templates/article.js`),
+          context: {
+            id: node.id,
+          },
+        });
+      });
+      resolve();
     });
   });
 
@@ -81,7 +129,8 @@ exports.createPages = ({ boundActionCreators, graphql }) => {
     })
   });
 
+
   // Query for articles nodes to use in creating pages.
-    return Promise.all([getArticles, getAuthors]);
+    return Promise.all([articles, getAuthors]);
 };
 

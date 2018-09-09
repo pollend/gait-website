@@ -2,10 +2,8 @@ import React from 'react'
 import Link from 'gatsby-link'
 const ReactMarkdown = require('react-markdown')
 
-const IndexPage = () => (
+const PublicationsPage = () => (
   <div>
-
   </div>
 )
-export default IndexPage
-
+export default PublicationsPage
